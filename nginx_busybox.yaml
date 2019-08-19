@@ -1,0 +1,40 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx:latest
+        name: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          #- mountPath: "/mount/"
+          name: pvc1
+      initContainers:
+      - name: install
+        image: busybox:1.28.4
+        volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: pvc1
+        args:
+        - "wget"
+        - "-O"
+        - "/usr/share/nginx/html/index.html"
+        - "https://raw.githubusercontent.com/pankajpandey9/simple-scripts/master/index.html"
+      volumes:
+      - name: pvc1
+        persistentVolumeClaim:
+          claimName: nginx-claim
